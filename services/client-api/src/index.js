@@ -4,12 +4,6 @@ const helmet = require('helmet');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 
-console.log('SERVER_PORT', process.env.SERVER_PORT);
-console.log('NODE_ENV', process.env.NODE_ENV);
-console.log('MEMCACHED_CLUSTERIP', process.env.MEMCACHED_CLUSTERIP);
-console.log('GOOGLE_API_KEY', process.env.GOOGLE_API_KEY);
-console.log('GOOGLE_SERVICE_JSON', process.env.GOOGLE_SERVICE_JSON);
-
 const SERVER_PORT = process.env.SERVER_PORT || config.server.port || 8080;
 
 const app = express();

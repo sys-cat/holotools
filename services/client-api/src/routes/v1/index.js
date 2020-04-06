@@ -36,8 +36,11 @@ router.get('/live', (req, res) => {
       });
     });
 
-    console.log('cacheLive', cacheLive);
-    if (cacheLive) return cacheLive;
+    // Return cache if exists
+    if (cacheLive) {
+      cacheLive.cached = true;
+      return cacheLive;
+    }
 
     // Result structure
     let results = {
@@ -92,7 +95,7 @@ router.get('/live', (req, res) => {
 
     // Save results to cache
     await new Promise((resolve, reject) => {
-      memcached.set('live', JSON.stringify(results), 30, (err) => {
+      memcached.set('live', JSON.stringify(results), 15, (err) => {
         if (err) reject(err);
         else resolve();
       });
