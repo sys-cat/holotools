@@ -1,19 +1,19 @@
-const config = require('config');
+require('dotenv').config();
+const bodyParser = require('body-parser');
+const cors = require('cors');
 const express = require('express');
 const helmet = require('helmet');
-const cors = require('cors');
-const bodyParser = require('body-parser');
 
-const SERVER_PORT = process.env.SERVER_PORT || config.server.port || 8080;
+const SERVER_PORT = process.env.SERVER_PORT || 8080;
 
 const app = express();
-app.use(helmet({}));
-app.use(cors({}));
-app.use(bodyParser.urlencoded({extended: false}));
-app.use(bodyParser.json({strict: false}));
+app.use(helmet());
+app.use(cors());
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json({ strict: false }));
 
 app.get('/', (req, res) => {
-  res.status(200).json({env: config.env, time: Date.now()});
+  res.status(200).json({ env: process.env.NODE_ENV, time: Date.now() });
 });
 
 const routes1 = require('./routes/v1');
@@ -21,5 +21,5 @@ const routes1 = require('./routes/v1');
 app.use('/v1', routes1);
 
 app.listen(SERVER_PORT, () => {
-  console.log('HOLOTOOLS WEB | :%d | %s | %s', SERVER_PORT, config.env, new Date().toString());
+  console.log('HOLOTOOLS WEB | :%d | %s | %s', SERVER_PORT, process.env.NODE_ENV, new Date().toString());
 });

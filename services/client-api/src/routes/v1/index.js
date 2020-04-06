@@ -6,11 +6,11 @@ const Memcached = require('memcached');
 const GOOGLE_AUTH = JSON.parse(process.env.GOOGLE_SERVICE_JSON);
 
 // Initialize Router
-const router = new Router();
+const router = Router();
 
 // Initialize Firestore
 const firestore = new Firestore({
-  // keyFilename: 'gcp-key.json',
+  projectId: GOOGLE_AUTH.project_id,
   credentials: {
     client_email: GOOGLE_AUTH.client_email,
     private_key: GOOGLE_AUTH.private_key,
