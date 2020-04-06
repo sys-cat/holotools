@@ -26,7 +26,13 @@ router.get('/live', (req, res) => {
     let cacheLive = await new Promise((resolve, reject) => {
       memcached.get('live', function(err, data) {
         if (err) reject(err);
-        else resolve(data);
+        else {
+          try {
+            resolve(JSON.parse(data));
+          } catch (parseError) {
+            resolve(null);
+          }
+        }
       });
     });
 
