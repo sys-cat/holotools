@@ -4,6 +4,7 @@ const cors = require('cors');
 const express = require('express');
 const helmet = require('helmet');
 
+const logger = require('./utils/logger');
 const errorHandler = require('./middlewares/errorHandler');
 
 const SERVER_PORT = process.env.SERVER_PORT || 8080;
@@ -18,12 +19,12 @@ app.get('/', (req, res) => {
   res.json({ env: process.env.NODE_ENV, time: Date.now() });
 });
 
-const routes1 = require('./routes/v1');
+const routesV1 = require('./routes/v1');
 
-app.use('/v1', routes1);
+app.use('/v1', routesV1);
 
 app.use(errorHandler);
 
 app.listen(SERVER_PORT, () => {
-  console.log('HOLOTOOLS WEB | :%d | %s | %s', SERVER_PORT, process.env.NODE_ENV, new Date().toString());
+  logger.log('HOLOTOOLS WEB | :%d | %s', SERVER_PORT, process.env.NODE_ENV);
 });

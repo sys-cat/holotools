@@ -6,6 +6,7 @@ const memcached = require('../../config/memcached');
 const firestore = require('../../config/firestore');
 const asyncMiddleware = require('../../middlewares/aysncMiddleware');
 const videoDataMapper = require('../../utils/videoDataMapper');
+const logger = require('../../utils/logger');
 
 const router = Router();
 
@@ -15,6 +16,7 @@ router.get('/live', asyncMiddleware(async (req, res) => {
 
   if (cacheData) {
     cacheData.cached = true;
+    logger.log('Returning cache');
     return res.json(cacheData);
   }
 
@@ -23,7 +25,7 @@ router.get('/live', asyncMiddleware(async (req, res) => {
     upcoming: [],
   };
 
-  console.log('FIRESTORE CALL');
+  logger.log('Fetching Firestore');
   const videoCollection = firestore.collection('video')
     .where('ytVideoId', '<', '\uf8ff')
     .where('status', 'in', [consts.VIDEO_STATUSES.LIVE, consts.VIDEO_STATUSES.UPCOMING]);
@@ -44,6 +46,7 @@ router.get('/live', asyncMiddleware(async (req, res) => {
   results.live = results.live.map(videoDataMapper);
   results.upcoming = results.upcoming.map(videoDataMapper);
 
+  logger.log('Saving cache');
   await memcached.set('live', JSON.stringify(results), consts.CACHE_LIFETIME_SECONDS);
 
   return res.json(results);
