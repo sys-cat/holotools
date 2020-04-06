@@ -1,5 +1,5 @@
 module.exports = {
-  VIDEO_STATUS: {
+  VIDEO_STATUSES: {
     LIVE: 'live',
     UPCOMING: 'upcoming',
   },

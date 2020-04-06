@@ -36,17 +36,17 @@ router.get('/live', asyncMiddleware(async (req, res) => {
   console.log('FIRESTORE CALL');
   const videoCollection = firestore.collection('video')
     .where('ytVideoId', '<', '\uf8ff')
-    .where('status', 'in', [consts.VIDEO_STATUS.LIVE, consts.VIDEO_STATUS.UPCOMING]);
+    .where('status', 'in', [consts.VIDEO_STATUSES.LIVE, consts.VIDEO_STATUSES.UPCOMING]);
   const videos = await videoCollection.get();
 
   const nowMoment = moment();
 
   videos.forEach((video) => {
     const videoData = video.data();
-    if (videoData.status === consts.VIDEO_STATUS.LIVE
+    if (videoData.status === consts.VIDEO_STATUSES.LIVE
       || nowMoment.isSameOrAfter(moment(videoData.liveSchedule))) {
       results.live.push(videoData);
-    } else if (videoData.status === consts.VIDEO_STATUS.UPCOMING) {
+    } else if (videoData.status === consts.VIDEO_STATUSES.UPCOMING) {
       results.upcoming.push(videoData);
     }
   });
