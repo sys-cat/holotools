@@ -1,118 +1,62 @@
+const { Router } = require('express');
+const { Firestore } = require('@google-cloud/firestore');
 const moment = require('moment-timezone');
-const {Router} = require('express');
-const {Firestore} = require('@google-cloud/firestore');
-const Memcached = require('memcached');
 
-const GOOGLE_AUTH = JSON.parse(process.env.GOOGLE_SERVICE_JSON);
+const consts = require('../../config/consts');
+const memcached = require('../../config/memcached');
+const asyncMiddleware = require('../../middlewares/aysncMiddleware');
+const videoDataMapper = require('../../utils/videoDataMapper');
 
-// Initialize Router
+const CLIENT_SECRET = JSON.parse(process.env.GOOGLE_SERVICE_JSON);
+
 const router = Router();
 
-// Initialize Firestore
 const firestore = new Firestore({
-  projectId: GOOGLE_AUTH.project_id,
+  projectId: CLIENT_SECRET.project_id,
   credentials: {
-    client_email: GOOGLE_AUTH.client_email,
-    private_key: GOOGLE_AUTH.private_key,
+    client_email: CLIENT_SECRET.client_email,
+    private_key: CLIENT_SECRET.private_key,
   },
 });
 
-// Initialize memcached
-const memcached = new Memcached(process.env.MEMCACHED_CLUSTERIP + ':11211');
+router.get('/live', asyncMiddleware(async (req, res) => {
+  const liveCache = await memcached.get('live');
+  const cacheData = liveCache && JSON.parse(liveCache);
 
-router.get('/live', (req, res) => {
-  (async function() {
-    // Check cache
-    let cacheLive = await new Promise((resolve, reject) => {
-      memcached.get('live', function(err, data) {
-        if (err) reject(err);
-        else {
-          try {
-            resolve(JSON.parse(data));
-          } catch (parseError) {
-            resolve(null);
-          }
-        }
-      });
-    });
+  if (cacheData) {
+    cacheData.cached = true;
+    return res.json(cacheData);
+  }
 
-    // Return cache if exists
-    if (cacheLive) {
-      cacheLive.cached = true;
-      return cacheLive;
+  const results = {
+    live: [],
+    upcoming: [],
+  };
+
+  console.log('FIRESTORE CALL');
+  const videoCollection = firestore.collection('video')
+    .where('ytVideoId', '<', '\uf8ff')
+    .where('status', 'in', [consts.VIDEO_STATUS.LIVE, consts.VIDEO_STATUS.UPCOMING]);
+  const videos = await videoCollection.get();
+
+  const nowMoment = moment();
+
+  videos.forEach((video) => {
+    const videoData = video.data();
+    if (videoData.status === consts.VIDEO_STATUS.LIVE
+      || nowMoment.isSameOrAfter(moment(videoData.liveSchedule))) {
+      results.live.push(videoData);
+    } else if (videoData.status === consts.VIDEO_STATUS.UPCOMING) {
+      results.upcoming.push(videoData);
     }
+  });
 
-    // Result structure
-    let results = {
-      live: [],
-      upcoming: [],
-    };
+  results.live = results.live.map(videoDataMapper);
+  results.upcoming = results.upcoming.map(videoDataMapper);
 
-    // Look for videos without information or status
-    console.log('FIRESTORE CALL');
-    let videoCol = firestore.collection('video')
-        .where('ytVideoId', '<', '\uf8ff')
-        .where('status', 'in', ['live', 'upcoming']);
-    let videoSch = await videoCol.get();
+  await memcached.set('live', JSON.stringify(results), consts.CACHE_LIFETIME_SECONDS);
 
-    // Get current timestamp
-    let nowMoment = moment();
-
-    // Run through all results
-    videoSch.forEach((videoItem) => {
-      let videoData = videoItem.data();
-      if (videoData.status == 'live' || nowMoment.isSameOrAfter(moment(videoData.liveSchedule))) {
-        results.live.push(videoData);
-      } else if (videoData.status == 'upcoming') {
-        results.upcoming.push(videoData);
-      }
-    });
-
-    // Reformat live videos
-    results.live = results.live.map((data) => {
-      return {
-        type: data.ytVideoId ? 'youtube' : 'bilibili',
-        id: data.ytVideoId || data.bbVideoId,
-        channel: data.ytChannelId,
-        image: data.ytVideoId ? 'https://i.ytimg.com/vi/' + data.ytVideoId + '/hqdefault.jpg' : data.thumbnail,
-        title: data.title,
-        timeScheduled: parseInt(moment(data.liveSchedule).format('X'), 10),
-        viewers: parseInt(data.liveViewers, 10),
-      };
-    });
-
-    // Reformat upcoming videos
-    results.upcoming = results.upcoming.map((data) => {
-      return {
-        type: data.ytVideoId ? 'youtube' : 'bilibili',
-        id: data.ytVideoId || data.bbVideoId,
-        channel: data.ytChannelId,
-        image: data.ytVideoId ? 'https://i.ytimg.com/vi/' + data.ytVideoId + '/hqdefault.jpg' : data.thumbnail,
-        title: data.title,
-        timeScheduled: parseInt(moment(data.liveSchedule).format('X'), 10),
-      };
-    });
-
-    // Save results to cache
-    await new Promise((resolve, reject) => {
-      memcached.set('live', JSON.stringify(results), 15, (err) => {
-        if (err) reject(err);
-        else resolve();
-      });
-    })
-        .catch((err) => {
-          console.error('ERR memcached.set', err);
-        });
-
-    // Result
-    return results;
-  })()
-      .then((result) => {
-        res.status(200).json(result);
-      })
-      .catch((err) => {
-        res.status(200).json({error: err.message});
-      });
-});
+  return res.json(results);
+}));
 
 module.exports = router;

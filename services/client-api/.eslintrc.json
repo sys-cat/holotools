@@ -8,6 +8,8 @@
     "airbnb-base"
   ],
   "rules": {
-    "no-console": "off"
+    "eqeqeq": "error",
+    "no-console": "off",
+    "no-underscore-dangle": "off"
   }
 }
