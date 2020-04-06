@@ -3,7 +3,7 @@ const {Router} = require('express');
 const {Firestore} = require('@google-cloud/firestore');
 const Memcached = require('memcached');
 
-// const GOOGLE_AUTH = JSON.parse(process.env.GOOGLE_SERVICE_JSON);
+const GOOGLE_AUTH = JSON.parse(process.env.GOOGLE_SERVICE_JSON);
 
 // Initialize Router
 const router = new Router();
@@ -11,17 +11,14 @@ const router = new Router();
 // Initialize Firestore
 const firestore = new Firestore({
   // keyFilename: 'gcp-key.json',
-  // credentials: {
-  //   client_email: GOOGLE_AUTH.client_email,
-  //   private_key: GOOGLE_AUTH.private_key,
-  // },
+  credentials: {
+    client_email: GOOGLE_AUTH.client_email,
+    private_key: GOOGLE_AUTH.private_key,
+  },
 });
 
 // Initialize memcached
-// const memcached = new Memcached(process.env.MEMCACHED_CLUSTERIP + ':11211');
-// memcached.on('failure', function( details ) {
-//   console.log('Cannot connect to memcached', details);
-// });
+const memcached = new Memcached(process.env.MEMCACHED_CLUSTERIP + ':11211');
 
 router.get('/live', (req, res) => {
   (async function() {

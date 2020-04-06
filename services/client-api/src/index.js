@@ -4,6 +4,12 @@ const helmet = require('helmet');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 
+console.log('SERVER_PORT', process.env.SERVER_PORT);
+console.log('NODE_ENV', process.env.NODE_ENV);
+console.log('MEMCACHED_CLUSTERIP', process.env.MEMCACHED_CLUSTERIP);
+console.log('GOOGLE_API_KEY', process.env.GOOGLE_API_KEY);
+console.log('GOOGLE_SERVICE_JSON', process.env.GOOGLE_SERVICE_JSON);
+
 const SERVER_PORT = process.env.SERVER_PORT || config.server.port || 8080;
 
 const app = express();
@@ -20,14 +26,6 @@ const routes1 = require('./routes/v1');
 
 app.use('/v1', routes1);
 
-app.get('/test', (req, res) => {
-  const testConfigMapJson = process.env.GOOGLE_SERVICE_JSON;
-  console.log('testConfigMapJson', testConfigMapJson);
-  res.status(200).send('ok');
-});
-
 app.listen(SERVER_PORT, () => {
   console.log('HOLOTOOLS WEB | :%d | %s | %s', SERVER_PORT, config.env, new Date().toString());
 });
-
-
