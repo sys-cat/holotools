@@ -1,23 +1,13 @@
 const { Router } = require('express');
-const { Firestore } = require('@google-cloud/firestore');
 const moment = require('moment-timezone');
 
 const consts = require('../../config/consts');
 const memcached = require('../../config/memcached');
+const firestore = require('../../config/firestore');
 const asyncMiddleware = require('../../middlewares/aysncMiddleware');
 const videoDataMapper = require('../../utils/videoDataMapper');
 
-const CLIENT_SECRET = JSON.parse(process.env.GOOGLE_SERVICE_JSON);
-
 const router = Router();
-
-const firestore = new Firestore({
-  projectId: CLIENT_SECRET.project_id,
-  credentials: {
-    client_email: CLIENT_SECRET.client_email,
-    private_key: CLIENT_SECRET.private_key,
-  },
-});
 
 router.get('/live', asyncMiddleware(async (req, res) => {
   const liveCache = await memcached.get('live');
