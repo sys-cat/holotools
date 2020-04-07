@@ -1,4 +1,4 @@
-FROM node:12-alpine3.9
+FROM node:12-alpine
 COPY . /
 RUN npm install --production
-CMD [ "npm", "run", "start" ]
+CMD ["npm", "run", "start"]
