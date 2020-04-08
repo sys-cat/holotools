@@ -8,6 +8,9 @@ steps:
 #   - --cluster=$_CLUSTER
 
 - name: gcr.io/cloud-builders/kubectl
+  envs:
+  - 'CLOUDSDK_COMPUTE_ZONE=$_LOCATION'
+  - 'CLOUDSDK_CONTAINER_CLUSTER=$_CLUSTER'
   args:
   - create
   - secret
