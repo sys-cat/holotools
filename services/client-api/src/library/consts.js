@@ -10,7 +10,10 @@ module.exports = () => {
       YOUTUBE: 'youtube',
       BILIBILI: 'bilibili',
     },
-    CACHE_LIFETIME_SECONDS: 15,
+    CACHE_TTL: {
+      LIVE: 15,
+      CHANNELS: 21600,
+    },
     VIDEOS_PAST_HOURS: 6,
   };
 };

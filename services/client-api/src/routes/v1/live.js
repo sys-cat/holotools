@@ -61,8 +61,10 @@ router.get('/', (req, res) => {
       results.ended.push(videoObj.toJSON());
     });
 
-    Memcached.set('live', JSON.stringify(results), consts.CACHE_LIFETIME_SECONDS);
+    // Save result to cache
+    Memcached.set('live', JSON.stringify(results), consts.CACHE_TTL.LIVE);
 
+    // Return results
     return results;
   })()
       .then((result) => {
