@@ -18,7 +18,7 @@ spec:
     spec:
       containers:
       - name: "client-api-2"
-        image: "gcr.io/vtubersubs/holotools/client-api"
+        image: "gcr.io/${PROJECT_ID}/holotools/client-api"
         env:
         - name: "NODE_ENV"
           valueFrom:
