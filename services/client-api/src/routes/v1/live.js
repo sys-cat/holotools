@@ -3,36 +3,41 @@ const moment = require('moment-timezone');
 const {HoloVideo} = require('../../classes');
 const {consts, Firestore, Memcached, log} = require('../../library');
 
+// Initialize Router
 const router = new Router();
 
 router.get('/', (req, res) => {
   (async () => {
-    const liveCache = await Memcached.get('live')
-        .catch((err) => {
-          log.ward('Unable to get cache.');
-          return null;
-        });
-    const cacheData = liveCache && JSON.parse(liveCache);
-
-    if (cacheData) {
-      cacheData.cached = true;
-      log.info('Returning cache');
-      return res.json(cacheData);
+    // Check cache, and return if it exists
+    const liveCache = await Memcached.get('live');
+    if (liveCache) {
+      try {
+        liveCache = JSON.parse(liveCache);
+      } catch (error) {
+        liveCache = null;
+      }
+      if (liveCache) {
+        liveCache.cached = true;
+        return liveCache;
+      }
     }
 
+    // Result structure
     const results = {
       live: [],
       upcoming: [],
+      ended: [],
     };
 
-    log.info('Fetching Firestore');
+    // Look for videos that are live or upcoming
     const videoCollection = Firestore.collection('video')
-        .where('ytVideoId', '<', '\uf8ff')
         .where('status', 'in', [consts.VIDEO_STATUSES.LIVE, consts.VIDEO_STATUSES.UPCOMING]);
     const videos = await videoCollection.get();
 
+    // Get current timestamp
     const nowMoment = moment();
 
+    // Run through all results
     videos.forEach((video) => {
       const videoData = video.data();
       const videoObj = new HoloVideo(videoData);
@@ -43,7 +48,19 @@ router.get('/', (req, res) => {
       }
     });
 
-    // log.info('Saving cache');
+    // Look for videos that have recently ended
+    const endedCollection = Firestore.collection('video')
+        .where('liveEnd', '>', nowMoment.clone().subtract(consts.VIDEOS_PAST_HOURS, 'hour').toISOString());
+    const pastVideos = await endedCollection.get();
+
+    // Add past videos into results
+    pastVideos.forEach((video) => {
+      console.log('video', video);
+      const videoData = video.data();
+      const videoObj = new HoloVideo(videoData);
+      results.ended.push(videoObj.toJSON());
+    });
+
     Memcached.set('live', JSON.stringify(results), consts.CACHE_LIFETIME_SECONDS);
 
     return results;
