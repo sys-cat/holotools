@@ -1,7 +1,11 @@
 steps:
 
 - name: "gcr.io/cloud-builders/gke-deploy"
-  args: [ 'run', '--filename=./devops/steps/001_ConfigMap.yaml', ' --location=$_LOCATION', '--cluster=$_CLUSTER' ]
+  args:
+  - run
+  - --filename=./devops/steps/001_ConfigMap.yaml
+  - --location=$_LOCATION
+  - --cluster=$_CLUSTER
 
 # - name: gcr.io/cloud-builders/kubectl
 #   args: [
@@ -17,7 +21,6 @@ steps:
 #   - --from-literal=google_service_json=$_GOOGLE_SERVICE_JSON
 
 # - name: "gcr.io/cloud-builders/gke-deploy"
-# args: [ 'run', '--filename=./devops/steps/003_cache-service.yaml', ' --location=$_LOCATION', '--cluster=$_CLUSTER' ]
 #   args:
 #   - run
 #   - --filename=./devops/steps/003_cache-service.yaml
@@ -25,7 +28,6 @@ steps:
 #   - --cluster=$_CLUSTER
 
 # - name: "gcr.io/cloud-builders/gke-deploy"
-# args: [ 'run', '--filename=./devops/steps/004_client-api-service.yaml', ' --location=$_LOCATION', '--cluster=$_CLUSTER' ]
 #   args:
 #   - run
 #   - --filename=./devops/steps/004_client-api-service.yaml
@@ -33,7 +35,6 @@ steps:
 #   - --cluster=$_CLUSTER
 
 # - name: "gcr.io/cloud-builders/gke-deploy"
-# args: [ 'run', '--filename=./devops/steps/005_client-api-ingress.yaml', ' --location=$_LOCATION', '--cluster=$_CLUSTER' ]
 #   args:
 #   - run
 #   - --filename=./devops/steps/005_client-api-ingress.yaml
@@ -41,7 +42,6 @@ steps:
 #   - --cluster=$_CLUSTER
 
 # - name: "gcr.io/cloud-builders/gke-deploy"
-# args: [ 'run', '--filename=./devops/steps/006_client-web-service.yaml', ' --location=$_LOCATION', '--cluster=$_CLUSTER' ]
 #   args:
 #   - run
 #   - --filename=./devops/steps/006_client-web-service.yaml
@@ -49,7 +49,6 @@ steps:
 #   - --cluster=$_CLUSTER
 
 # - name: "gcr.io/cloud-builders/gke-deploy"
-# args: [ 'run', '--filename=./devops/steps/007_client-web-ingress.yaml', ' --location=$_LOCATION', '--cluster=$_CLUSTER' ]
 #   args:
 #   - run
 #   - --filename=./devops/steps/007_client-web-ingress.yaml
