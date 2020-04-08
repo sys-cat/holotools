@@ -7,17 +7,31 @@ steps:
 #   - --location=$_LOCATION
 #   - --cluster=$_CLUSTER
 
-- name: gcr.io/cloud-builders/kubectl
-  env:
-  - 'CLOUDSDK_COMPUTE_ZONE=$_LOCATION'
-  - 'CLOUDSDK_CONTAINER_CLUSTER=$_CLUSTER'
+# - name: gcr.io/cloud-builders/kubectl
+#   env:
+#   - 'CLOUDSDK_COMPUTE_ZONE=$_LOCATION'
+#   - 'CLOUDSDK_CONTAINER_CLUSTER=$_CLUSTER'
+#   args:
+#   - create
+#   - secret
+#   - generic
+#   - holotools-keys
+#   - --from-literal=google_api_key=$_GOOGLE_API_KEY
+#   - --from-literal=google_service_json=$_GOOGLE_SERVICE_JSON
+
+- name: "gcr.io/cloud-builders/gcloud"
   args:
+  - beta
+  - builds
+  - triggers
   - create
-  - secret
-  - generic
-  - holotools-keys
-  - --from-literal=google_api_key=$_GOOGLE_API_KEY
-  - --from-literal=google_service_json=$_GOOGLE_SERVICE_JSON
+  - github
+  - --name=holotools-cache
+  - --repo-name=$_REPO_NAME
+  - --repo-owner=$_REPO_OWNER
+  - --branch-pattern="^develop$"
+  - --included-files="services/cache/**"
+  - --build-config="services/cache/build.yaml"
 
 # - name: "gcr.io/cloud-builders/gke-deploy"
 #   args:
@@ -55,6 +69,8 @@ steps:
 #   - --cluster=$_CLUSTER
 
 substitutions:
+  _REPO_NAME:
+  _REPO_OWNER:
   _LOCATION:
   _CLUSTER:
   _GOOGLE_API_KEY:
