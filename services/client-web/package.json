@@ -1,0 +1,6 @@
+{
+  "name": "holotools-client-web",
+  "scripts": {
+    "start": "node ."
+  }
+}
