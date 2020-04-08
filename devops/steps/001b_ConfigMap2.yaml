@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: holotools-config-2
+  namespace: default
+data:
+  NODE_ENV: "staging"
+  APP_SETTINGS: "{}"
